@@ -4,3 +4,23 @@
 
 /api/Geny.API/.vs/Geny.API.slnx
 /api/Geny.API/obj
+/api/Geny.API/src/Geny.Api/obj
+/api/Geny.API/src/Geny.Application/obj
+/api/Geny.API/src/Geny.Domain/obj
+/api/Geny.API/src/Geny.Infrastructure/obj
+/api/Geny.API/.vs/ProjectEvaluation
+/api/Geny.API/Docker/.env
+/api/Geny.API/src/Geny.Api/bin/Debug/net10.0
+/api/Geny.API/src/Geny.Application/bin/Debug/net10.0
+/api/Geny.API/src/Geny.Domain/bin/Debug/net10.0
+/api/Geny.API/src/Geny.Infrastructure/bin/Debug/net10.0
+/GennyMobile/.vscode
+/Geny.API/.vs
+/Geny.API/src/Geny.Api/bin/Debug/net10.0
+/Geny.API/src/Geny.Api/obj
+/Geny.API/src/Geny.Application/bin/Debug/net10.0
+/Geny.API/src/Geny.Application/obj
+/Geny.API/src/Geny.Domain/bin/Debug/net10.0
+/Geny.API/src/Geny.Domain/obj
+/Geny.API/src/Geny.Infrastructure/obj
+/Geny.API/src/Geny.Infrastructure/bin/Debug/net10.0

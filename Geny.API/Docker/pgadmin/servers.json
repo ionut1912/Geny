@@ -1,0 +1,44 @@
+{
+  "Servers": {
+    "1": {
+      "Name":            "Auth DB",
+      "Group":           "Order System",
+      "Host":            "postgres-auth",
+      "Port":            5432,
+      "MaintenanceDB":   "auth_db",
+      "Username":        "auth_user",
+      "SSLMode":         "prefer",
+      "PassFile":        "/pgpass"
+    },
+    "2": {
+      "Name":            "Orders DB",
+      "Group":           "Order System",
+      "Host":            "postgres-orders",
+      "Port":            5432,
+      "MaintenanceDB":   "orders_db",
+      "Username":        "orders_user",
+      "SSLMode":         "prefer",
+      "PassFile":        "/pgpass"
+    },
+    "3": {
+      "Name":            "Products DB",
+      "Group":           "Order System",
+      "Host":            "postgres-products",
+      "Port":            5432,
+      "MaintenanceDB":   "products_db",
+      "Username":        "products_user",
+      "SSLMode":         "prefer",
+      "PassFile":        "/pgpass"
+    },
+    "4": {
+      "Name":            "Inventory DB",
+      "Group":           "Order System",
+      "Host":            "postgres-inventory",
+      "Port":            5432,
+      "MaintenanceDB":   "inventory_db",
+      "Username":        "inventory_user",
+      "SSLMode":         "prefer",
+      "PassFile":        "/pgpass"
+    }
+  }
+}
