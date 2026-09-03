@@ -1,0 +1,260 @@
+{
+  "rabbit_version": "3.13.0",
+  "rabbitmq_version": "3.13.0",
+
+  "users": [
+    {
+      "name": "rabbit_user",
+      "password_hash": "",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator",
+      "limits": {}
+    }
+  ],
+
+  "vhosts": [
+    { "name": "order_vhost" }
+  ],
+
+  "permissions": [
+    {
+      "user":      "rabbit_user",
+      "vhost":     "order_vhost",
+      "configure": ".*",
+      "write":     ".*",
+      "read":      ".*"
+    }
+  ],
+
+  "exchanges": [
+    {
+      "name":        "order-system",
+      "vhost":       "order_vhost",
+      "type":        "topic",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments":   {}
+    },
+    {
+      "name":        "order-system.dlx",
+      "vhost":       "order_vhost",
+      "type":        "fanout",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments":   {}
+    }
+  ],
+
+  "queues": [
+    {
+      "name":        "inventory.order-placed",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx",
+        "x-dead-letter-routing-key": "inventory.order-placed.dlq"
+      }
+    },
+    {
+      "name":        "inventory.order-cancelled",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "inventory.order-delivered",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "inventory.product-created",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "inventory.product-updated",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "inventory.product-deleted",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "orders.stock-reserved",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "orders.stock-reservation-failed",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "orders.product-deleted",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "notification.user-registered",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "notification.password-reset-requested",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "notification.order-placed",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "notification.stock-reservation-failed",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "notification.order-cancelled",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "notification.order-shipped",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "notification.order-delivered",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "notification.refund-initiated",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "notification.stock-restocked",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "order-system.dlx"
+      }
+    },
+    {
+      "name":        "order-system.dead-letter",
+      "vhost":       "order_vhost",
+      "durable":     true,
+      "auto_delete": false,
+      "arguments":   {}
+    }
+  ],
+
+  "bindings": [
+    { "source": "order-system", "vhost": "order_vhost", "destination": "inventory.order-placed",             "destination_type": "queue", "routing_key": "OrderPlaced",            "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "inventory.order-cancelled",          "destination_type": "queue", "routing_key": "OrderCancelled",         "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "inventory.order-delivered",          "destination_type": "queue", "routing_key": "OrderDelivered",         "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "inventory.product-created",          "destination_type": "queue", "routing_key": "ProductCreated",         "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "inventory.product-updated",          "destination_type": "queue", "routing_key": "ProductUpdated",         "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "inventory.product-deleted",          "destination_type": "queue", "routing_key": "ProductDeleted",         "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "orders.stock-reserved",              "destination_type": "queue", "routing_key": "StockReserved",          "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "orders.stock-reservation-failed",    "destination_type": "queue", "routing_key": "StockReservationFailed", "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "orders.product-deleted",             "destination_type": "queue", "routing_key": "ProductDeleted",         "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "notification.user-registered",       "destination_type": "queue", "routing_key": "UserRegistered",         "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "notification.password-reset-requested","destination_type":"queue","routing_key": "PasswordResetRequested", "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "notification.order-placed",          "destination_type": "queue", "routing_key": "OrderPlaced",            "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "notification.stock-reservation-failed","destination_type":"queue","routing_key": "StockReservationFailed", "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "notification.order-cancelled",       "destination_type": "queue", "routing_key": "OrderCancelled",         "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "notification.order-shipped",         "destination_type": "queue", "routing_key": "OrderShipped",           "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "notification.order-delivered",       "destination_type": "queue", "routing_key": "OrderDelivered",         "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "notification.refund-initiated",      "destination_type": "queue", "routing_key": "RefundInitiated",        "arguments": {} },
+    { "source": "order-system", "vhost": "order_vhost", "destination": "notification.stock-restocked",       "destination_type": "queue", "routing_key": "StockRestocked",         "arguments": {} },
+    { "source": "order-system.dlx", "vhost": "order_vhost", "destination": "order-system.dead-letter",      "destination_type": "queue", "routing_key": "",                       "arguments": {} }
+  ],
+
+  "policies": [
+    {
+      "vhost":       "order_vhost",
+      "name":        "ha-all",
+      "pattern":     ".*",
+      "apply-to":    "queues",
+      "definition": {
+        "ha-mode": "all",
+        "ha-sync-mode": "automatic"
+      },
+      "priority": 0
+    }
+  ],
+
+  "global_parameters": [],
+  "parameters":        [],
+  "topic_permissions": []
+}

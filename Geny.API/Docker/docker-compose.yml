@@ -1,0 +1,212 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# docker-compose.yml
+# Full stack — infrastructure + all .NET services + React SPA.
+# Extends docker-compose.infra.yml so you don't duplicate infrastructure config.
+#
+#   docker compose up -d --build          # build and start everything
+#   docker compose up -d --build auth-api  # rebuild one service
+#   docker compose logs -f orders-api     # tail logs for one service
+#   docker compose down                   # stop (keeps volumes)
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: order-system
+
+include:
+  - docker-compose.infra.yml
+
+services:
+
+  # ── Auth.Api ─────────────────────────────────────────────────────────────
+  auth-api:
+    build:
+      context: ../src/Auth.Api
+      dockerfile: Dockerfile
+    container_name: auth-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT:        Development
+      ASPNETCORE_URLS:               http://+:5001
+      ConnectionStrings__AuthDb:     Host=postgres-auth;Port=5432;Database=auth_db;Username=auth_user;Password=auth_pass
+      Jwt__PrivateKeyPath:           /app/keys/auth-private.pem
+      Jwt__PublicKeyPath:            /app/keys/auth-public.pem
+      Jwt__Issuer:                   https://auth.order-system.local
+      Jwt__AccessTokenMinutes:       "15"
+      Jwt__RefreshTokenDays:         "7"
+      RabbitMq__Uri:                 amqp://rabbit_user:rabbit_pass@rabbitmq:5672/order_vhost
+      Seq__ServerUrl:                http://seq:5341
+      SendGrid__ApiKey:              ${SENDGRID_API_KEY}
+      Cors__AllowedOrigins:          http://localhost:3000
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./keys:/app/keys:ro   # RS256 key pair (see README — generate with openssl)
+    networks:
+      - order-net
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Orders.Api ───────────────────────────────────────────────────────────
+  orders-api:
+    build:
+      context: ../src/Orders.Api
+      dockerfile: Dockerfile
+    container_name: orders-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT:         Development
+      ASPNETCORE_URLS:                http://+:5002
+      ConnectionStrings__OrdersDb:    Host=postgres-orders;Port=5432;Database=orders_db;Username=orders_user;Password=orders_pass
+      Jwt__JwksUri:                   http://auth-api:5001/.well-known/jwks.json
+      Jwt__Issuer:                    https://auth.order-system.local
+      RabbitMq__Uri:                  amqp://rabbit_user:rabbit_pass@rabbitmq:5672/order_vhost
+      Seq__ServerUrl:                 http://seq:5341
+      Cors__AllowedOrigins:           http://localhost:3000
+    ports:
+      - "5002:5002"
+    networks:
+      - order-net
+    depends_on:
+      postgres-orders:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5002/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Products.Api ─────────────────────────────────────────────────────────
+  products-api:
+    build:
+      context: ../src/Products.Api
+      dockerfile: Dockerfile
+    container_name: products-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT:           Development
+      ASPNETCORE_URLS:                  http://+:5003
+      ConnectionStrings__ProductsDb:    Host=postgres-products;Port=5432;Database=products_db;Username=products_user;Password=products_pass
+      Jwt__JwksUri:                     http://auth-api:5001/.well-known/jwks.json
+      Jwt__Issuer:                      https://auth.order-system.local
+      RabbitMq__Uri:                    amqp://rabbit_user:rabbit_pass@rabbitmq:5672/order_vhost
+      Seq__ServerUrl:                   http://seq:5341
+      Cors__AllowedOrigins:             http://localhost:3000
+      S3__BucketName:                   ${S3_BUCKET_NAME}
+      S3__Region:                       ${S3_REGION}
+      S3__AccessKey:                    ${S3_ACCESS_KEY}
+      S3__SecretKey:                    ${S3_SECRET_KEY}
+    ports:
+      - "5003:5003"
+    networks:
+      - order-net
+    depends_on:
+      postgres-products:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5003/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Inventory.Worker ─────────────────────────────────────────────────────
+  inventory-worker:
+    build:
+      context: ../src/Inventory.Worker
+      dockerfile: Dockerfile
+    container_name: inventory-worker
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT:              Development
+      ASPNETCORE_URLS:                     http://+:5004
+      ConnectionStrings__InventoryDb:      Host=postgres-inventory;Port=5432;Database=inventory_db;Username=inventory_user;Password=inventory_pass
+      Jwt__JwksUri:                        http://auth-api:5001/.well-known/jwks.json
+      Jwt__Issuer:                         https://auth.order-system.local
+      RabbitMq__Uri:                       amqp://rabbit_user:rabbit_pass@rabbitmq:5672/order_vhost
+      Seq__ServerUrl:                      http://seq:5341
+    ports:
+      - "5004:5004"
+    networks:
+      - order-net
+    depends_on:
+      postgres-inventory:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5004/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Notification.Worker ──────────────────────────────────────────────────
+  notification-worker:
+    build:
+      context: ../src/Notification.Worker
+      dockerfile: Dockerfile
+    container_name: notification-worker
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      RabbitMq__Uri:          amqp://rabbit_user:rabbit_pass@rabbitmq:5672/order_vhost
+      Seq__ServerUrl:         http://seq:5341
+      SendGrid__ApiKey:       ${SENDGRID_API_KEY}
+      SendGrid__FromEmail:    noreply@order-system.local
+      SendGrid__FromName:     Order System
+      App__FrontendUrl:       http://localhost:3000
+    networks:
+      - order-net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    # No healthcheck port — this service has no HTTP surface
+
+  # ── React SPA (served via Nginx in prod, Vite dev server here) ───────────
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      target: development         # use multi-stage: 'production' for prod build
+    container_name: frontend
+    restart: unless-stopped
+    environment:
+      VITE_AUTH_API_URL:      http://localhost:5001
+      VITE_ORDERS_API_URL:    http://localhost:5002
+      VITE_PRODUCTS_API_URL:  http://localhost:5003
+      VITE_INVENTORY_API_URL: http://localhost:5004
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend:/app           # hot reload in dev
+      - /app/node_modules          # anonymous volume to avoid overwriting node_modules
+    networks:
+      - order-net
+    depends_on:
+      auth-api:
+        condition: service_healthy
+      orders-api:
+        condition: service_healthy
+      products-api:
+        condition: service_healthy
+      inventory-worker:
+        condition: service_healthy

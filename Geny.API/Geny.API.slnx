@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/Geny.Api/Geny.Api.csproj" Id="4155a899-a829-47b0-9293-2a9c269e984e" />
+  <Project Path="src/Geny.Application/Geny.Application.csproj" Id="18284443-9a18-4e75-930c-3ff8f780f2a1" />
+  <Project Path="src/Geny.Domain/Geny.Domain.csproj" Id="11347374-4515-4212-ae34-7750229e5964" />
+  <Project Path="src/Geny.Infrastructure/Geny.Infrastructure.csproj" Id="0d8773f0-2090-4d3a-bda5-d37b69a85cd3" />
+</Solution>

@@ -1,0 +1,70 @@
+name: genny-system-infra
+
+services:
+
+  postgres-genny:
+    image: postgres:16-alpine
+    container_name: postgres-genny
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       genny_db
+      POSTGRES_USER:     genny_user
+      POSTGRES_PASSWORD: genny_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-genny-data:/var/lib/postgresql/data
+    networks:
+      - genny-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U genny_user -d genny_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --requirepass redis_pass --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - genny-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis_pass", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL:                  admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD:               pgadmin_pass
+      PGADMIN_CONFIG_SERVER_MODE:             "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+    networks:
+      - genny-net
+    depends_on:
+      postgres-genny:
+        condition: service_healthy
+
+volumes:
+  postgres-genny-data:
+  redis-data:
+  pgadmin-data:
+
+networks:
+  genny-net:
+    driver: bridge
+    name: genny-net
