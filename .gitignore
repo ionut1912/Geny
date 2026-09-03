@@ -24,3 +24,5 @@
 /Geny.API/src/Geny.Domain/obj
 /Geny.API/src/Geny.Infrastructure/obj
 /Geny.API/src/Geny.Infrastructure/bin/Debug/net10.0
+*.env
+.env
